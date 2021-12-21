@@ -26,30 +26,34 @@ pipeline {
 
     post {
         success {
-                // mark build as failed
-                currentBuild.result = 'Success'
-                // set variables
-                def subject = "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} ${currentBuild.result}"
+                script {
+                    // mark build as failed
+                    currentBuild.result = 'Success'
+                    // set variables
+                    def subject = "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} ${currentBuild.result}"
 
-                // send email
-                if(to != null && !to.isEmpty()) {
-                emailext(body: content, mimeType: 'text/html',
-                    replyTo: '$DEFAULT_REPLYTO', subject: subject,
-                    to: to, attachLog: true )
+                    // send email
+                    if(to != null && !to.isEmpty()) {
+                    emailext(body: content, mimeType: 'text/html',
+                        replyTo: '$DEFAULT_REPLYTO', subject: subject,
+                        to: to, attachLog: true )
+                    }
                 }
             }
 
             failure {
+                script {
                     // mark build as failed
-                currentBuild.result = 'Failed'
-                // set variables
-                def subject = "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} ${currentBuild.result}"
+                    currentBuild.result = 'Failed'
+                    // set variables
+                    def subject = "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} ${currentBuild.result}"
 
-                // send email
-                if(to != null && !to.isEmpty()) {
-                emailext(body: content, mimeType: 'text/html',
-                    replyTo: '$DEFAULT_REPLYTO', subject: subject,
-                    to: to, attachLog: true )
+                    // send email
+                    if(to != null && !to.isEmpty()) {
+                    emailext(body: content, mimeType: 'text/html',
+                        replyTo: '$DEFAULT_REPLYTO', subject: subject,
+                        to: to, attachLog: true )
+                    }
                 }
             }
     }
