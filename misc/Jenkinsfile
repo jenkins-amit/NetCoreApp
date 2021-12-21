@@ -1,34 +1,50 @@
-node {
-    def commit_id
+pipeline {
+    agent any
+    stages {
+            stage('Preparation') {
+                to = emailextrecipients([
+                    [$class: 'CulpritsRecipientProvider'],
+                    [$class: 'DevelopersRecipientProvider'],
+                    [$class: 'RequesterRecipientProvider']
+                ])
+                
+                checkout scm
+                sh 'git rev-parse --short HEAD > .git/commit-id'
+                commit_id = readFile('.git/commit-id').trim()
+            }
 
-    def to = emailextrecipients([
-          [$class: 'CulpritsRecipientProvider'],
-          [$class: 'DevelopersRecipientProvider'],
-          [$class: 'RequesterRecipientProvider']
-        ])
-
-    stage("Preparation") {
-        checkout scm
-        sh "git rev-parse --short HEAD > .git/commit-id"
-        commit_id = readFile('.git/commit-id').trim()
+            stage('Build AND Publish') {
+                bat 'dotnet publish -c Release -o app/publish'
+            }
     }
 
-    stage("Build AND Publish") {
-        bat "dotnet publish -c Release -o app/publish"
-    }
+    post {
+        success {
+                // mark build as failed
+                currentBuild.result = 'Success'
+                // set variables
+                def subject = "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} ${currentBuild.result}"
 
-    stage("Send Email") {
-         // mark build as failed
-        currentBuild.result = "Success";
-        // set variables
-        def subject = "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} ${currentBuild.result}"
-        def content = '${JELLY_SCRIPT,template="html"}'
+                // send email
+                if(to != null && !to.isEmpty()) {
+                emailext(body: content, mimeType: 'text/html',
+                    replyTo: '$DEFAULT_REPLYTO', subject: subject,
+                    to: to, attachLog: true )
+                }
+            }
 
-        // send email
-        if(to != null && !to.isEmpty()) {
-        emailext(body: content, mimeType: 'text/html',
-            replyTo: '$DEFAULT_REPLYTO', subject: subject,
-            to: to, attachLog: true )
-        }
+            failure {
+                    // mark build as failed
+                currentBuild.result = 'Failed'
+                // set variables
+                def subject = "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} ${currentBuild.result}"
+
+                // send email
+                if(to != null && !to.isEmpty()) {
+                emailext(body: content, mimeType: 'text/html',
+                    replyTo: '$DEFAULT_REPLYTO', subject: subject,
+                    to: to, attachLog: true )
+                }
+            }
     }
 }
