@@ -17,7 +17,7 @@ pipeline {
             slackSend color: "#02fe89", channel: "#jenkins-build", message:"Build deployed successfully - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
         }
         failure {
-            failOnError:true color: "#f60e0e", channel: "#jenkins-build", message:"Build deployed failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+            slackSend color: "#f60e0e", channel: "#jenkins-build", message:"Build deployed failed - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
         }
     }
 }
