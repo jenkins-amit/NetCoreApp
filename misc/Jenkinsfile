@@ -25,6 +25,11 @@ pipeline {
     }
 
     post {
+        always {
+            script {
+                def content = '${JELLY_SCRIPT,template="html"}'
+            }
+        }
         success {
                 script {
                     // mark build as failed
