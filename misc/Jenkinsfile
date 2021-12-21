@@ -46,7 +46,7 @@ pipeline {
                             "files": [
                                 {
                                 "pattern": "${ARCHIVE_NAME}",
-                                "target": "netcoreapp-generic-local/"
+                                "target": "netcoreapp-generic-local/${env.BUILD_NUMBER}/"
                                 }
                             ]
                         }"""
