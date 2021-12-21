@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    environment {
+        ARCHIVE_NAME = 'NetCoreApp.zip'
+    }
     stages {
             stage('Preparation') {
                 steps {
@@ -17,9 +20,38 @@ pipeline {
                 }
             }
 
-            stage('Build AND Publish') {
+            stage('Build') {
                 steps {
                     bat 'dotnet publish -c Release -o app/publish'
+                }
+            }
+
+            stage('Artifact') {
+                steps {
+                    script {
+                        if (fileExists(ARCHIVE_NAME)) {
+                            bat "del ${ARCHIVE_NAME}"
+                        }
+                        zip zipFile: "${ARCHIVE_NAME}", archive: true, dir: 'app/publish'
+                    }
+                }
+            }
+
+            stage('Publish Artifact') {
+                steps {
+                    script {
+                        server = Artifactory.server 'amitdevops.jfrog.io'
+
+                        def uploadSpec = """{
+                            "files": [
+                                {
+                                "pattern": "${ARCHIVE_NAME}",
+                                "target": "netcoreapp-generic-local/"
+                                }
+                            ]
+                        }"""
+                        server.upload(uploadSpec)
+                    }
                 }
             }
     }
