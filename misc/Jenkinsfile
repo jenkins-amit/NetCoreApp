@@ -31,6 +31,14 @@ pipeline {
                 }
             }
 
+            stage ("Archive") {
+                steps {
+                    script {
+                        archiveArtifacts artifacts: "${ARCHIVE_NAME}"
+                    }
+                }
+            }
+
             stage('Artifact') {
                 steps {
                     script {
