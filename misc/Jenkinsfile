@@ -1,0 +1,18 @@
+node {
+    def commit_id
+    def nuget = "\"C:\\Program Files (x86)\\Nuget\\nuget.exe\""
+    def slnName = "NetCoreApp.sln"
+    def csProjName = "NetCoreApp.csproj"
+
+    stage("Preparation") {
+        checkout scm
+        sh "git rev-parse --short HEAD > .git/commit-id"
+        commit_id = readFile('.git/commit-id').trim()
+    }
+
+    stage("Build") {
+        bat "${nuget} restore \"${slnName}\""
+        bat "${msbuild} ${slnName} /p:Configuration=${PUBLISH_PROFILE} /t:rebuild"
+        bat "${msbuild} ${csProjName} /p:DeployOnBuild=true;PublishProfile=${PUBLISH_PROFILE}"
+    }
+}
