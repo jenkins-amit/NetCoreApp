@@ -27,7 +27,7 @@ pipeline {
     post {
         always {
             script {
-                def content = '${JELLY_SCRIPT,template="html"}'
+                content = '${JELLY_SCRIPT,template="html"}'
             }
         }
         success {
@@ -35,7 +35,7 @@ pipeline {
                     // mark build as failed
                     currentBuild.result = 'Success'
                     // set variables
-                    def subject = "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} ${currentBuild.result}"
+                    subject = "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} ${currentBuild.result}"
 
                     // send email
                     if(to != null && !to.isEmpty()) {
