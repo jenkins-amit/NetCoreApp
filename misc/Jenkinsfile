@@ -21,11 +21,13 @@ pipeline {
             }
 
             stage('Build') {
-                script {
-                    dir("app/publish") {
-                        deleteDir()
+                steps {
+                    script {
+                        dir("app/publish") {
+                            deleteDir()
+                        }
+                        bat 'dotnet publish -c Release -o app/publish'
                     }
-                    bat 'dotnet publish -c Release -o app/publish'
                 }
             }
 
